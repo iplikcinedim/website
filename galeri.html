@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The Brush Art HS — Galeri. Çalışmalarımıza göz atın." />
+  <title>Galeri | The Brush Art HS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <style>
+    .gallery-full-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-3);
+    }
+    @media (max-width: 768px) { .gallery-full-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .gallery-full-grid { grid-template-columns: 1fr; } }
+
+    .gf-item {
+      position: relative;
+      border-radius: var(--r-md);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .gf-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s var(--ease);
+      display: block;
+    }
+    .gf-item:hover img { transform: scale(1.05); }
+    .gf-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%);
+      opacity: 0; transition: opacity var(--med);
+      display: flex; align-items: flex-end;
+      padding: var(--sp-4);
+    }
+    .gf-item:hover .gf-overlay { opacity: 1; }
+    .gf-overlay span { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92); z-index: 2000;
+      align-items: center; justify-content: center;
+      padding: var(--sp-6);
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-img { max-width: 90vw; max-height: 90vh; border-radius: var(--r-md); object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: var(--sp-6); right: var(--sp-6);
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; color: #fff; font-size: 1.3rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background var(--fast);
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.28); }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 48px; height: 48px; background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background var(--fast);
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.28); }
+    .lightbox-prev { left: var(--sp-6); }
+    .lightbox-next { right: var(--sp-6); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar scrolled" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><span class="logo-main">The Brush Art</span><span class="logo-tag">HS</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="hizmetler.html"  class="nav-link">Hizmetler</a></li>
+      <li><a href="galeri.html"     class="nav-link active">Galeri</a></li>
+      <li><a href="hakkimizda.html" class="nav-link">Hakkımızda</a></li>
+      <li><a href="iletisim.html"   class="nav-link">İletişim</a></li>
+    </ul>
+    <a href="iletisim.html" class="btn btn-dark btn-sm nav-cta">Randevu Al</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menü" aria-expanded="false">
+      <span class="toggle-bar"></span><span class="toggle-bar"></span><span class="toggle-bar"></span>
+    </button>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-bg" aria-hidden="true"></div>
+  <div class="container">
+    <nav class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="breadcrumb-sep">›</span><span>Galeri</span></nav>
+    <p class="section-eyebrow"><span class="eyebrow-line"></span>Galeri</p>
+    <h1 class="section-title">Ustalığın <span class="text-gold">Fotoğrafları</span></h1>
+    <p>Ekibimizin gerçek müşteri çalışmalarından oluşan galeri.</p>
+  </div>
+</div>
+
+<section class="gallery">
+  <div class="container">
+    <div class="gallery-full-grid" id="galleryGrid">
+      <!-- Populated by JS below -->
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotoğraf görüntüleyici">
+  <button class="lightbox-close" id="lbClose" aria-label="Kapat">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lbPrev" aria-label="Önceki">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <img class="lightbox-img" id="lbImg" src="" alt="" />
+  <button class="lightbox-nav lightbox-next" id="lbNext" aria-label="Sonraki">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand"><a href="index.html" class="nav-logo"><span class="logo-main">The Brush Art</span><span class="logo-tag">HS</span></a><p>Beşiktaş'ın premium güzellik deneyimi.</p></div>
+      <nav class="footer-nav"><p>Sayfalar</p><ul><li><a href="hizmetler.html">Hizmetler</a></li><li><a href="galeri.html">Galeri</a></li><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="iletisim.html">İletişim</a></li></ul></nav>
+      <div class="footer-social"><p>Bizi Takip Edin</p><div class="social-links"><a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 The Brush Art HS.</p><p>Abbasağa Sokağı No:8/A, Beşiktaş · İstanbul</p></div>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  const cfg = APP_CONFIG.slider;
+  const labels = ['Balayage', 'Kesim', 'Renklendirme', 'Bakım', 'Şekillendirme', 'Fön', 'Stil', 'Gelin'];
+  const grid = document.getElementById('galleryGrid');
+  const imgs = cfg.images.map((item, i) => cfg.folder + item.file);
+
+  if (!grid) return;
+
+  cfg.images.forEach((item, i) => {
+    const fig = document.createElement('figure');
+    fig.className = 'gf-item';
+    fig.setAttribute('data-scroll-reveal', '');
+    fig.setAttribute('data-delay', String((i % 3) * 80));
+    fig.style.cursor = 'pointer';
+
+    const img = document.createElement('img');
+    img.src = cfg.folder + item.file;
+    img.alt = item.caption || labels[i] || '';
+    img.loading = i < 6 ? 'eager' : 'lazy';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'gf-overlay';
+    overlay.innerHTML = `<span>${item.caption || labels[i] || ''}</span>`;
+
+    fig.appendChild(img);
+    fig.appendChild(overlay);
+    grid.appendChild(fig);
+
+    fig.addEventListener('click', () => openLightbox(i));
+  });
+
+  /* Scroll reveal for dynamically added items */
+  document.querySelectorAll('[data-scroll-reveal]').forEach(el => {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    io.observe(el);
+  });
+
+  /* Lightbox */
+  let lbIndex = 0;
+  const lb    = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+
+  function openLightbox(i) {
+    lbIndex = i;
+    lbImg.src = imgs[i];
+    lbImg.alt = cfg.images[i]?.caption || '';
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  document.getElementById('lbPrev').addEventListener('click', () => { lbIndex = (lbIndex - 1 + imgs.length) % imgs.length; lbImg.src = imgs[lbIndex]; });
+  document.getElementById('lbNext').addEventListener('click', () => { lbIndex = (lbIndex + 1) % imgs.length; lbImg.src = imgs[lbIndex]; });
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowLeft')  { lbIndex = (lbIndex - 1 + imgs.length) % imgs.length; lbImg.src = imgs[lbIndex]; }
+    if (e.key === 'ArrowRight') { lbIndex = (lbIndex + 1) % imgs.length; lbImg.src = imgs[lbIndex]; }
+  });
+})();
+</script>
+</body>
+</html>

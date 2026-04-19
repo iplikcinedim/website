@@ -1,0 +1,170 @@
+/* animations.css
+   Tüm keyframe'ler ve motion-related şeyler burada.
+   style.css'de animasyon yoksa önce buraya bak. */
+
+
+/* ── Keyframe tanımları ─────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes marquee {
+  /* track'in yarısını kaydır, sonra anında başa dön - seamless loop için
+     bunun çalışması için HTML'de içeriği tam olarak 2 kez tekrarlamak gerekiyor */
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes scroll-bounce {
+  /* indicator noktası yukarı aşağı zıplıyor, opacity ile daha smooth görünüyor */
+  0%, 100% { transform: translateY(0);  opacity: 1;  }
+  50%       { transform: translateY(8px); opacity: .4; }
+}
+
+@keyframes pulse-dot {
+  /* nav badge'deki yeşil nokta - "canlıyız, açığız" hissi vermesi için */
+  0%, 100% { transform: scale(1);   opacity: 1;  }
+  50%       { transform: scale(1.7); opacity: .4; }
+}
+
+/* hero görseli ve floating card'lar hafifçe yukarı aşağı iniyor */
+@keyframes float-badge {
+  0%, 100% { transform: translateY(0px)  rotate(-2deg); }
+  50%       { transform: translateY(-7px) rotate(-2deg); }
+}
+@keyframes float-rating {
+  /* badge ile aynı anda hareket etmesin diye phase farkı var (delay ile ayarlandı) */
+  0%, 100% { transform: translateY(0px)  rotate(2deg); }
+  50%       { transform: translateY(-9px) rotate(2deg); }
+}
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes line-grow {
+  /* eyebrow'un solundaki altın çizgi sola uzuyor */
+  from { width: 0; }
+  to   { width: 28px; }
+}
+
+@keyframes glow-pulse {
+  /* arka plandaki blur'lu altın ışımalar soluklaşıp koyulaşıyor,
+     çok belirgin yapınca dikkat dağıtıyor, bu opacity aralığı dengeli */
+  0%, 100% { opacity: .4; }
+  50%       { opacity: .85; }
+}
+
+/* ── Hero sayfa açılış animasyonları ────────────────────────────────────────── */
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes reveal-from-right {
+  from { opacity: 0; transform: translateX(36px);  }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+@keyframes reveal-from-left {
+  from { opacity: 0; transform: translateX(-36px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+
+/* ── Başlangıç durumu — body.loaded gelince animasyon başlar ────────────────── */
+/* başlangıçta opacity:0 vermek gerekiyor ki animasyon flash yaratmasın.
+   CSS animation forward-fill (both) kullandığımız için animasyon bitmeden görünmüyorlar */
+
+.reveal,
+.reveal-right,
+.reveal-left { opacity: 0; }
+
+body.loaded .reveal       { animation: reveal-up          var(--slow) var(--ease) both; }
+body.loaded .reveal-right { animation: reveal-from-right  var(--slow) var(--ease) both; }
+body.loaded .reveal-left  { animation: reveal-from-left   var(--slow) var(--ease) both; }
+
+/* data-delay attribute ile stagger efekti - her element biraz gecikmeli geliyor.
+   JS'de her birine ayrı ayrı setTimeout yazmak yerine CSS attribute okumak daha temiz */
+body.loaded [data-delay="0"]   { animation-delay:   0ms; }
+body.loaded [data-delay="80"]  { animation-delay:  80ms; }
+body.loaded [data-delay="120"] { animation-delay: 120ms; }
+body.loaded [data-delay="160"] { animation-delay: 160ms; }
+body.loaded [data-delay="240"] { animation-delay: 240ms; }
+body.loaded [data-delay="360"] { animation-delay: 360ms; }
+body.loaded [data-delay="480"] { animation-delay: 480ms; }
+
+/* eyebrow çizgisi hero reveal'dan biraz önce başlasın */
+body.loaded .eyebrow-line { animation: line-grow 0.55s var(--ease) 0.1s both; }
+
+
+/* ── Scroll reveal (IntersectionObserver ile çalışıyor, main.js'e bak) ──────── */
+
+[data-scroll-reveal] {
+  opacity: 0;
+  transform: translateY(30px);
+  /* will-change tarayıcıya "bu element dönüşecek" sinyali verir,
+     önceden composite layer açar - daha smooth animasyon sağlar.
+     ama her şeye ekleme, GPU memory harcar */
+  will-change: opacity, transform;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+[data-scroll-reveal].in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* in-view gelince will-change'i temizle - artık composite layer'a gerek yok */
+[data-scroll-reveal].in-view {
+  will-change: auto;
+}
+
+/* transition-delay'ler — reveal gibi data-delay attribute'u kullanıyor */
+[data-scroll-reveal][data-delay="0"]   { transition-delay:   0ms; }
+[data-scroll-reveal][data-delay="80"]  { transition-delay:  80ms; }
+[data-scroll-reveal][data-delay="100"] { transition-delay: 100ms; }
+[data-scroll-reveal][data-delay="120"] { transition-delay: 120ms; }
+[data-scroll-reveal][data-delay="160"] { transition-delay: 160ms; }
+[data-scroll-reveal][data-delay="200"] { transition-delay: 200ms; }
+[data-scroll-reveal][data-delay="240"] { transition-delay: 240ms; }
+
+
+/* ── Floating elementler ────────────────────────────────────────────────────── */
+
+/* delay ile phase farkı - ikisi aynı anda sallanırsa kötü görünüyor */
+.hero-badge  { animation: float-badge  3.5s ease-in-out infinite 0.5s; }
+.hero-rating { animation: float-rating 4.2s ease-in-out infinite 1.2s; }
+
+/* SVG orb hero görselinde bağımsız tempo ile yüzüyor */
+.placeholder-orb { animation: float-orb 5s ease-in-out infinite; }
+
+
+/* ── Arka plan efektleri ────────────────────────────────────────────────────── */
+
+/* iki glow farklı hızda soluklaşıyor - aynı hızda olsa robotik görünür */
+.hero-glow--right { animation: glow-pulse 7s ease-in-out infinite; }
+.hero-glow--left  { animation: glow-pulse 9s ease-in-out infinite 2s; }
+
+.scroll-dot { animation: scroll-bounce 2.2s ease-in-out infinite; }
+.badge-dot  { animation: pulse-dot 2.5s ease-in-out infinite; }
+
+
+/* ── prefers-reduced-motion ─────────────────────────────────────────────────── */
+/* epilepsi ve vestibüler bozuklukları olan kullanıcılar için önemli.
+   Windows'ta "Animasyonları azalt", macOS'ta "Hareketi azalt" ayarını açanlara saygı. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count: 1     !important;
+    transition-duration:      0.01ms !important;
+  }
+
+  /* animasyon olmayacaksa başlangıç opacity:0 sorun çıkarır - hepsini göster */
+  [data-scroll-reveal]          { opacity: 1; transform: none; }
+  .reveal, .reveal-right, .reveal-left { opacity: 1; }
+
+  html { scroll-behavior: auto; }
+}
